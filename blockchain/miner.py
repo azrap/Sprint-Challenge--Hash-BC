@@ -1,5 +1,6 @@
 import hashlib
 import requests
+import json
 
 import sys
 
@@ -8,6 +9,8 @@ from uuid import uuid4
 from timeit import default_timer as timer
 
 import random
+
+DIFFICULTY = 6
 
 
 def proof_of_work(last_proof):
@@ -24,7 +27,15 @@ def proof_of_work(last_proof):
 
     print("Searching for next proof")
     proof = 0
+    # last_proof_string = f'{last_proof}'.encode()
+    last_proof_string = json.dumps(last_proof, sort_keys=True).encode()
+    last_hash = hashlib.sha256(last_proof_string).hexdigest()
+
     #  TODO: Your code here
+    while valid_proof(last_hash, proof) is False:
+        proof += 1
+
+    # - p is the previous proof, and p' is the new proof
 
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
@@ -40,7 +51,13 @@ def valid_proof(last_hash, proof):
     """
 
     # TODO: Your code here!
-    pass
+    # proof_string = f'{proof}'.encode()
+
+    proof_string = json.dumps(proof, sort_keys=True).encode()
+
+    guess_hash = hashlib.sha256(proof_string).hexdigest()
+
+    return last_hash[-DIFFICULTY:] == guess_hash[0:DIFFICULTY]
 
 
 if __name__ == '__main__':
